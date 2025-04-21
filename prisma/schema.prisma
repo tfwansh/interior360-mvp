@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  name            String?
+  projects        Project[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Project model
+model Project {
+  id              String    @id @default(uuid())
+  title           String
+  description     String?
+  spaceType       String
+  size            Float
+  budget          Float
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  layouts         Layout[]
+  moodBoards      MoodBoard[]
+  workingDrawings WorkingDrawing[]
+  materials       Material[]
+  executionTracker ExecutionTracker?
+  status          ProjectStatus @default(IN_PROGRESS)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Layout model
+model Layout {
+  id              String    @id @default(uuid())
+  name            String
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id])
+  layoutData      String    // JSON string of layout configuration
+  isApproved      Boolean   @default(false)
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// MoodBoard model
+model MoodBoard {
+  id              String    @id @default(uuid())
+  name            String
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id])
+  styleType       String
+  images          Image[]
+  isApproved      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Image model for MoodBoard
+model Image {
+  id              String    @id @default(uuid())
+  url             String
+  caption         String?
+  moodBoardId     String
+  moodBoard       MoodBoard @relation(fields: [moodBoardId], references: [id])
+  createdAt       DateTime  @default(now())
+}
+
+// WorkingDrawing model
+model WorkingDrawing {
+  id              String    @id @default(uuid())
+  name            String
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id])
+  type            DrawingType
+  fileUrl         String
+  isApproved      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Material model
+model Material {
+  id              String    @id @default(uuid())
+  name            String
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id])
+  category        MaterialCategory
+  brand           String?
+  price           Float?
+  quantity        Float?
+  vendorId        String?
+  vendor          Vendor?   @relation(fields: [vendorId], references: [id])
+  status          MaterialStatus @default(SELECTED)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Vendor model
+model Vendor {
+  id              String    @id @default(uuid())
+  name            String
+  contact         String?
+  address         String?
+  materials       Material[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ExecutionTracker model
+model ExecutionTracker {
+  id              String    @id @default(uuid())
+  projectId       String    @unique
+  project         Project   @relation(fields: [projectId], references: [id])
+  sitePreparation Boolean   @default(false)
+  electrical      Boolean   @default(false)
+  ceiling         Boolean   @default(false)
+  wallConcepts    Boolean   @default(false)
+  progress        Int       @default(0) // 0-100%
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Enums
+enum ProjectStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum DrawingType {
+  ELECTRICAL
+  PLUMBING
+  CEILING
+  WALL
+  TILES
+  FURNITURE
+}
+
+enum MaterialCategory {
+  FLOORING
+  WALL
+  FURNITURE
+  LIGHTING
+  ACCESSORIES
+  OTHER
+}
+
+enum MaterialStatus {
+  SELECTED
+  ORDERED
+  DELIVERED
+  INSTALLED
+}
