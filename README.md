@@ -1,7 +1,6 @@
 # Interior360 - Interior Design Project Management
 
 ![Interior360 Platform Overview](./public/interior360-banner.png)
-*Note: Replace this banner image with your own project screenshot or logo.*
 
 End-to-end interior design project management platform inspired by Dzylo, providing a streamlined workflow for designers and clients.
 
